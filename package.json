@@ -1,0 +1,13 @@
+{
+  "name": "claude-translator",
+  "version": "1.0.0",
+  "description": "Tradutor desktop estilo Google Tradutor, alimentado pelo Claude Code CLI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^43.3.0"
+  }
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self'" />
+  <title>Tradutor Claude</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="logo" aria-hidden="true">文</span>
+      <h1>Tradutor</h1>
+    </div>
+    <div class="controls">
+      <label class="auto" for="auto-toggle">
+        <input type="checkbox" id="auto-toggle" checked />
+        Traduzir automaticamente
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <div class="panels">
+      <section class="panel" aria-label="Texto original">
+        <div class="panel-header">
+          <select id="source-lang"></select>
+          <button class="icon-btn" id="clear-btn" title="Limpar texto">✕</button>
+        </div>
+        <textarea id="source-text" placeholder="Texto" spellcheck="false"></textarea>
+        <div class="panel-footer">
+          <span id="char-count">0</span>
+        </div>
+      </section>
+
+      <button class="swap-btn" id="swap-btn" title="Trocar idiomas">⇄</button>
+
+      <section class="panel" aria-label="Tradução">
+        <div class="panel-header">
+          <select id="target-lang"></select>
+          <button class="icon-btn" id="copy-btn" title="Copiar tradução">⧉</button>
+        </div>
+        <div id="target-text" class="output" aria-live="polite"></div>
+        <div class="panel-footer">
+          <span class="status" id="status"></span>
+          <span id="target-char-count">0</span>
+        </div>
+      </section>
+    </div>
+
+    <div class="action-bar">
+      <button class="primary-btn" id="translate-btn">
+        Traduzir <kbd>Ctrl</kbd>+<kbd>Enter</kbd>
+      </button>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Segredos — nunca versionar
+config.json
+
+# Dependências
+node_modules/
+
+# Logs / config local
+*.log
