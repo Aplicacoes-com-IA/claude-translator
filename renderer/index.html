@@ -1,60 +1,256 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self'; style-src 'self'" />
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
   <title>Tradutor Claude</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Cabeçalho Principal -->
   <header>
     <div class="brand">
       <span class="logo" aria-hidden="true">文</span>
-      <h1>Tradutor</h1>
+      <h1>Tradutor <span>Claude</span></h1>
     </div>
-    <div class="controls">
-      <label class="auto" for="auto-toggle">
-        <input type="checkbox" id="auto-toggle" checked />
-        Traduzir automaticamente
-      </label>
+
+    <div class="header-actions">
+      <button class="nav-btn" id="pin-btn" title="Fixar janela no topo" aria-label="Fixar janela no topo">
+        <span class="btn-icon">📌</span>
+        <span class="btn-text">Fixar</span>
+      </button>
+
+      <button class="nav-btn" id="theme-btn" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+        <span class="btn-icon" id="theme-icon">🌓</span>
+        <span class="btn-text" id="theme-label">Tema</span>
+      </button>
+
+      <button class="nav-btn" id="history-btn" title="Histórico de traduções (Ctrl+H)" aria-label="Histórico de traduções">
+        <span class="btn-icon">🕐</span>
+        <span class="btn-text">Histórico</span>
+      </button>
+
+      <button class="nav-btn" id="settings-btn" title="Configurações do tradutor (Ctrl+,)" aria-label="Configurações">
+        <span class="btn-icon">⚙️</span>
+        <span class="btn-text">Opções</span>
+      </button>
+
+      <div class="auto-wrap">
+        <label class="toggle-switch" for="auto-toggle" title="Traduzir automaticamente ao digitar">
+          <input type="checkbox" id="auto-toggle" checked />
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Auto-traduzir</span>
+      </div>
     </div>
   </header>
 
+  <!-- Área de Trabalho Principal -->
   <main>
     <div class="panels">
-      <section class="panel" aria-label="Texto original">
+      <!-- Painel de Entrada (Texto Original) -->
+      <section class="panel source-panel" aria-label="Texto de entrada">
         <div class="panel-header">
-          <select id="source-lang"></select>
-          <button class="icon-btn" id="clear-btn" title="Limpar texto">✕</button>
+          <div class="lang-tabs" id="source-lang-tabs"></div>
         </div>
-        <textarea id="source-text" placeholder="Texto" spellcheck="false"></textarea>
+
+        <textarea id="source-text" placeholder="Digite ou cole o texto aqui..." spellcheck="false"></textarea>
+
         <div class="panel-footer">
-          <span id="char-count">0</span>
+          <div class="panel-tools">
+            <button class="tool-btn" id="mic-btn" title="Gravar voz e transcrever no app (Ctrl+Shift+D)">
+              <span class="tool-icon" id="mic-icon">🎙️</span>
+              <span class="tool-label" id="mic-label">Voz</span>
+            </button>
+            <button class="tool-btn" id="source-tts-btn" title="Ouvir pronúncia">
+              <span class="tool-icon">🔊</span>
+              <span class="tool-label">Ouvir</span>
+            </button>
+            <button class="tool-btn" id="paste-btn" title="Colar da área de transferência (Ctrl+Shift+V)">
+              <span class="tool-icon">📋</span>
+              <span class="tool-label">Colar</span>
+            </button>
+            <button class="tool-btn" id="clear-btn" title="Limpar texto">
+              <span class="tool-icon">✕</span>
+              <span class="tool-label">Limpar</span>
+            </button>
+          </div>
+          <span class="char-info" id="char-count">0 caracteres • 0 palavras</span>
         </div>
       </section>
 
-      <button class="swap-btn" id="swap-btn" title="Trocar idiomas">⇄</button>
+      <!-- Botão de Inversão -->
+      <div class="swap-wrapper">
+        <button class="swap-btn" id="swap-btn" title="Inverter idiomas (Ctrl+Shift+S)">
+          <span>⇄</span>
+        </button>
+      </div>
 
-      <section class="panel" aria-label="Tradução">
+      <!-- Painel de Saída (Tradução) -->
+      <section class="panel target-panel" aria-label="Resultado da tradução">
         <div class="panel-header">
-          <select id="target-lang"></select>
-          <button class="icon-btn" id="copy-btn" title="Copiar tradução">⧉</button>
+          <div class="lang-tabs" id="target-lang-tabs"></div>
         </div>
-        <div id="target-text" class="output" aria-live="polite"></div>
+
+        <div class="output-container">
+          <div id="target-text" class="output" aria-live="polite"></div>
+          <div id="diff-view" class="diff-view" style="display: none;"></div>
+        </div>
+
         <div class="panel-footer">
-          <span class="status" id="status"></span>
-          <span id="target-char-count">0</span>
+          <div class="panel-tools">
+            <button class="tool-btn highlight" id="copy-btn" title="Copiar tradução (Ctrl+Shift+C)">
+              <span class="tool-icon" id="copy-icon">⧉</span>
+              <span class="tool-label" id="copy-label">Copiar</span>
+            </button>
+            <button class="tool-btn" id="target-tts-btn" title="Ouvir pronúncia">
+              <span class="tool-icon">🔊</span>
+              <span class="tool-label">Ouvir</span>
+            </button>
+            <button class="tool-btn" id="markdown-toggle-btn" title="Alternar visualização Markdown">
+              <span class="tool-icon">👁️</span>
+              <span class="tool-label">Markdown</span>
+            </button>
+            <button class="tool-btn" id="diff-toggle-btn" title="Ver alterações (modo Melhorar)" style="display: none;">
+              <span class="tool-icon">🔍</span>
+              <span class="tool-label">Diff</span>
+            </button>
+          </div>
+
+          <div class="footer-meta">
+            <span class="status" id="status"></span>
+            <span class="char-info" id="target-char-count">0 caracteres • 0 palavras</span>
+          </div>
         </div>
       </section>
     </div>
 
-    <div class="action-bar">
-      <button class="primary-btn" id="translate-btn">
-        Traduzir <kbd>Ctrl</kbd>+<kbd>Enter</kbd>
-      </button>
+    <!-- Barra de Modo e Tom -->
+    <div class="control-toolbar">
+      <div class="mode-fields">
+        <div class="field-item">
+          <label for="mode-select">Modo:</label>
+          <select id="mode-select"></select>
+        </div>
+
+        <div class="field-item">
+          <label for="tone-select">Tom / Estilo:</label>
+          <select id="tone-select"></select>
+        </div>
+      </div>
+
+      <div class="action-btn-group">
+        <button class="primary-btn" id="translate-btn">
+          <span id="translate-label">Traduzir</span>
+          <span class="shortcut-badge"><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span>
+        </button>
+      </div>
     </div>
   </main>
+
+  <!-- Modal de Configurações -->
+  <div class="modal-overlay" id="settings-modal" style="display: none;">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="modal-header">
+        <h2 id="settings-title">⚙️ Configurações do Tradutor</h2>
+        <button class="close-btn" id="close-settings-btn" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="cfg-engine">Provedor / Motor:</label>
+          <select id="cfg-engine">
+            <option value="auto">Automático (HTTP com Fallback para Claude CLI)</option>
+            <option value="http">Apenas API HTTP (OmniRoute / OpenAI / OpenRouter)</option>
+            <option value="cli">Apenas Claude CLI (claude -p)</option>
+          </select>
+          <small class="form-hint">O modo automático usa a API local rápida e recorre ao Claude CLI se o servidor estiver offline.</small>
+        </div>
+
+        <div class="form-group" id="cfg-http-group">
+          <label for="cfg-base-url">Base URL da API HTTP:</label>
+          <input type="text" id="cfg-base-url" placeholder="http://localhost:20128/api/v1" />
+        </div>
+
+        <div class="form-group" id="cfg-key-group">
+          <label for="cfg-api-key">Chave de API (API Key):</label>
+          <div class="password-wrapper">
+            <input type="password" id="cfg-api-key" placeholder="sk-..." />
+            <button type="button" class="toggle-pwd-btn" id="toggle-key-visibility" title="Mostrar/Ocultar chave">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-group" id="cfg-model-group">
+          <label for="cfg-model">Modelo:</label>
+          <input type="text" id="cfg-model" placeholder="opencode/big-pickle, claude-3-5-haiku..." />
+          <small class="form-hint">Use "auto" para usar o modelo rápido padrão.</small>
+        </div>
+
+        <div class="form-group test-connection-row">
+          <button class="secondary-btn" id="test-connection-btn">Testar Conexão com API</button>
+          <span class="test-result" id="test-result-status"></span>
+        </div>
+
+        <hr class="modal-divider" />
+
+        <div class="form-group">
+          <label for="cfg-debounce">Atraso do Auto-traduzir: <strong id="debounce-val">1200ms</strong></label>
+          <input type="range" id="cfg-debounce" min="400" max="3000" step="100" value="1200" />
+          <div class="range-labels">
+            <span>Rápido (400ms)</span>
+            <span>Equilibrado (1200ms)</span>
+            <span>Relaxado (3000ms)</span>
+          </div>
+        </div>
+
+        <hr class="modal-divider" />
+
+        <div class="shortcuts-section">
+          <h3>⌨️ Atalhos de Teclado</h3>
+          <div class="shortcuts-grid">
+            <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> <span>Traduzir agora</span></div>
+            <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> <span>Inverter idiomas</span></div>
+            <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> <span>Copiar tradução</span></div>
+            <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> <span>Colar no original</span></div>
+            <div class="shortcut-item"><kbd>Win</kbd>+<kbd>H</kbd> <span>Ditado por voz</span></div>
+            <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>,</kbd> <span>Abrir configurações</span></div>
+            <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>H</kbd> <span>Histórico</span></div>
+            <div class="shortcut-item"><kbd>Esc</kbd> <span>Fechar janelas / Cancelar</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="secondary-btn" id="cancel-settings-btn">Cancelar</button>
+        <button class="primary-btn" id="save-settings-btn">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal / Gaveta de Histórico -->
+  <div class="modal-overlay" id="history-modal" style="display: none;">
+    <div class="modal-card history-card" role="dialog" aria-modal="true" aria-labelledby="history-title">
+      <div class="modal-header">
+        <h2 id="history-title">🕐 Histórico de Traduções</h2>
+        <div class="modal-header-actions">
+          <button class="danger-btn-text" id="clear-all-history-btn" title="Limpar todo o histórico">Limpar tudo</button>
+          <button class="close-btn" id="close-history-btn" aria-label="Fechar">✕</button>
+        </div>
+      </div>
+
+      <div class="history-search-bar">
+        <input type="text" id="history-search-input" placeholder="Pesquisar no histórico..." />
+      </div>
+
+      <div class="modal-body history-body" id="history-list">
+        <!-- Itens inseridos dinamicamente pelo JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Contêiner de Notificações Toast -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <script src="app.js"></script>
 </body>
